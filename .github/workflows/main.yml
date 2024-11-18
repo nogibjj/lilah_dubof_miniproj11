@@ -28,8 +28,6 @@ jobs:
         run: make extract 
       - name: transform
         run: make transform
-      - name: query
-        run: make query
       - name: test
         run: make test
       - name: format

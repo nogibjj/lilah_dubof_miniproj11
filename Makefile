@@ -23,11 +23,8 @@ deploy:
 	#deploy goes here
 
 extract: 
-	python main.py extract
+	python extract.py extract
 
 transform:
-	python main.py transform
-
-query: 
-	python main.py complex_query "SELECT r1.Industry, COUNT(r1.Employee_ID) AS count_of_employees, AVG(r1.Hours_Worked_Per_Week) AS avg_hours_worked, AVG(CASE WHEN r2.Stress_Level = 'High' THEN 1 WHEN r2.Stress_Level = 'Medium' THEN 2 WHEN r2.Stress_Level = 'Low' THEN 3 ELSE NULL END) AS avg_stress_level FROM remote_health1 AS r1 JOIN remote_health2 AS r2 ON r1.Employee_ID = r2.Employee_ID GROUP BY r1.Industry ORDER BY count_of_employees DESC;"
+	python transform.py transform
 

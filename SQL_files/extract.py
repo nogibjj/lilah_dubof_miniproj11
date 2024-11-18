@@ -1,23 +1,22 @@
-# can use this file to extract csv from a url
-""" This file can take csv data from a url and extract it to be transformed and queried """
-
 import requests
+from pyspark.sql import SparkSession
 import os
 
-def extract_data(
-    url1="""https://raw.githubusercontent.com/lilah-duboff/data-for-URLS/refs/heads/main/table_1_remote_work_mental_health_data.csv""",
-    url2="""https://raw.githubusercontent.com/lilah-duboff/data-for-URLS/refs/heads/main/table_2_remote_work_mental_health_data.csv""",
-    path1="data/table_1_remote_work_mental_health_data.csv",
-    path2="data/table_2_remote_work_mental_health_data.csv",
-    directory="data",
-):
-    """Extract data from a url to a file path"""
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    with requests.get(url1) as r:
-        with open(path1, "wb") as f:
-            f.write(r.content)
-    with requests.get(url2) as r:
-        with open(path2, "wb") as f:
-            f.write(r.content)
-    return path1, path2
+# Extracting data from GitHub
+def extract(file_path, url="https://raw.githubusercontent.com/lilah-duboff/data-for-URLS/refs/heads/main/table_1_remote_work_mental_health_data.csv"):
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    # Request data from URL
+    response = requests.get(url)
+    
+    # Check for successful request
+    if response.status_code == 200:
+        with open(file_path, 'wb') as f:
+            f.write(response.content)
+        print(f"File downloaded successfully: {file_path}")
+        return file_path
+    else:
+        print(f"Failed to download file. Status code: {response.status_code}")
+        return None
