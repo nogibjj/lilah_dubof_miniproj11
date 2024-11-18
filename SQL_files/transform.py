@@ -1,121 +1,78 @@
-# This file should take the cvs data and convert it into a database, or .db file
-# performs the CREATE from CRUD operations
-import csv
-import os
-from databricks import sql
-from dotenv import load_dotenv
+import pandas as pd
+
+LOG_FILE = "query_log.md"
 
 
-def transform_1(data1):
-    """Transforms and loads first data into the database"""
-
-    payload1 = csv.reader(open(data1, newline=""), delimiter=",")
-    next(payload1)
-
-    load_dotenv()
-    server_h = os.getenv("SERVER_HOSTNAME")
-    access_token = os.getenv("ACCESS_TOKEN")
-    http_path = os.getenv("HTTP_PATH")
-    with sql.connect(
-        server_hostname=server_h,
-        http_path=http_path,
-        access_token=access_token,
-    ) as connection:
-        c = connection.cursor()
-        c.execute("SHOW TABLES FROM default LIKE 'remote_health1'")
-        result = c.fetchall()
-        if not result:
-            c.execute(
-                """
-                    CREATE TABLE remote_health1 (
-                        Employee_ID STRING,
-                        Age INTEGER,
-                        Gender STRING,
-                        Job_Role STRING,
-                        Industry STRING,
-                        Years_of_Experience INTEGER,
-                        Work_Location STRING,
-                        Hours_Worked_Per_Week INTEGER,
-                        Number_of_Virtual_Meetings INTEGER,
-                        Work_Life_Balance_Rating INTEGER
-                    )
-                """
-            )
-        for idx, row in enumerate(payload1):
-            print(f"Inserting row {idx + 1}: {row}")
-            c.execute(
-                """
-                    INSERT INTO remote_health1 (
-                            Employee_ID, Age, Gender, Job_Role, Industry, Years_of_Experience, 
-                            Work_Location, Hours_Worked_Per_Week, Number_of_Virtual_Meetings, 
-                            Work_Life_Balance_Rating
-                            ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                row,
-            )
-            
-        connection.commit()
-        c.execute("SHOW TABLES FROM default LIKE 'remote_health1'")
-        result = c.fetchall()
-        c.close()
-        print("Successfully transformed and loaded first data!")
-    return "Success"
+def log_query(query, result="none"):
+    """adds to a query markdown file"""
+    with open(LOG_FILE, "a") as file:
+        file.write(f"```sql\n{query}\n```\n\n")
+        file.write(f"```response from databricks\n{result}\n```\n\n")
 
 
-def transform_2(data2):
-    """Transforms and loads second data into the database"""
+def describe(table_name):
+    """Performs summary stats on the table"""
+    # Spark SQL query to describe the table structure and statistics
+    query_stats = f"DESCRIBE EXTENDED {table_name}"
+    
+    try:
+        stats_result_df = spark.sql(query_stats)
+        stats_pandas_df = stats_result_df.toPandas()
+        stats_result_str = stats_pandas_df.to_markdown(index=False)
+        log_query(query, result=stats_result_str)
+        return stats_pandas_df
+    
+    except Exception as e:
+        error_message = f"Error while describing table {table_name}: {str(e)}"
+        log_query(query, result=error_message)
+        raise
 
-    payload2 = csv.reader(open(data2, newline=""), delimiter=",")
-    next(payload2)
 
-    load_dotenv()
-    server_h = os.getenv("SERVER_HOSTNAME")
-    access_token = os.getenv("ACCESS_TOKEN")
-    http_path = os.getenv("HTTP_PATH")
-    with sql.connect(
-        server_hostname=server_h,
-        http_path=http_path,
-        access_token=access_token,
-    ) as connection:
-        c = connection.cursor()
-        c.execute("SHOW TABLES FROM default LIKE 'remote_health2'")
-        result = c.fetchall()
-        if not result:
-            c.execute(
-                """
-                    CREATE TABLE remote_health2 (
-                            Employee_ID STRING,
-                            Stress_Level STRING,
-                            Mental_Health_Condition STRING,
-                            Access_to_Mental_Health_Resources BOOLEAN,
-                            Productivity_Change STRING,
-                            Social_Isolation_Rating INTEGER,
-                            Satisfaction_with_Remote_Work STRING,
-                            Company_Support_for_Remote_Work INTEGER,
-                            Physical_Activity STRING,
-                            Sleep_Quality STRING,
-                            Region STRING 
-                    )
-                """
-            )
+def query(query: str, delta_table_name: str, table_name: str = None, overwrite=True):
+    try:
+        # Check if delta_table_name is provided
+        if not delta_table_name:
+            raise ValueError(f"Delta table name must be provided, provided: {delta_table_name}")
+        
+        # If no table name is provided, extract from delta_table_name
+        table_name = table_name or delta_table_name.split(".")[-1]
+        table_name = f"`{table_name}`"  
+        log_query(query, result="Query received, executing next...")
+        print(f"Executing SQL query on table {delta_table_name}")
+        
+        # Execute the query
+        result_df = spark.sql(query)
+        pandas_df = result_df.toPandas()
+        
+        # Convert the df to markdown
+        result_str = pandas_df.to_markdown(index=False)  
+        log_query(query, result=result_str)
+        return result_df
+    
+    except Exception as e:
+        # Catch and log any errors during the query execution
+        error_message = f"Error occurred: {e}"
+        log_query(query, result=error_message)
+        print(error_message)
+        return None 
 
-        for idx, row in enumerate(payload2):
-            print(f"Inserting row {idx + 1}: {row}")
-            c.execute(
-                """
-                    INSERT INTO remote_health2 (
-                            Employee_ID, Stress_Level, Mental_Health_Condition, 
-                            Access_to_Mental_Health_Resources, Productivity_Change, 
-                            Social_Isolation_Rating, Satisfaction_with_Remote_Work, 
-                            Company_Support_for_Remote_Work, Physical_Activity, Sleep_Quality, Region
-                            ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                row,
-            )
-        connection.commit()
-        c.execute("SHOW TABLES FROM default LIKE 'remote_health2'")
-        c.close()
-        print("Successfully transformed and loaded second data!")
-    return "Success"
+
+
+# Query:
+outputdf = query("""SELECT Industry, COUNT(Employee_ID)
+        AS Number_Of_Employees 
+        FROM remote_health1 
+        GROUP BY Industry 
+        ORDER BY Number_Of_Employees DESC;""",
+        "remote_health1")
+
+stats_output = query("""SELECT Industry, 
+    AVG(Hours_Worked_Per_Week) AS avg_hours_worked
+    FROM remote_health1
+    GROUP BY Industry
+    ORDER BY avg_hours_worked DESC;""", "remote_health1")
+
+test_1 = query("""SELECT Employee_ID, COUNT(*)
+FROM remote_health1
+GROUP BY Employee_ID
+HAVING COUNT(*) > 1""", "remote_health1")

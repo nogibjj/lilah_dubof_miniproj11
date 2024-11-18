@@ -1,18 +1,16 @@
-# Mini-Project 11: Data Pipeline with databricks
-#### The purpose of this project is to create a data pipeline through databricks, utilizing a data source and a data sink, and generate a video or notebook report on _______
-
-#### We are making a model (can use scikit learn or databricks)
+# Mini Project 11: Data Pipeline with Databricks
+#### The purpose of this project is to perform a ETL workflow on a csv file that has been loaded into databricks, and utilize a personal compute to run the pipeline
 
 #### Requirements:
 
 - [X] Create a data pipeline using Databricks
 - [X] Include at least one data source and one data sink
 - [X] Pipeline functionality 
+- [X] Data source and sink configuration
 - [X] CI/CD pipeline
-- [X] Data source and sink configuration 
 - [X] README.md
-- [x] Databricks notebook or script
-- [x] Document or video demonstrating the pipeline
+- [X] Databricks notebook or script
+- [X] Document or video demonstrating the pipeline
 
 
 ---
@@ -28,17 +26,11 @@
             - main.yml
     - data
         - Table 1 csv file
-        - Table 2 csv file
     - SQL_files
-        - complex_query.py
         - extract.py
-        - transform.py
-    - ETL_complex_diagram (arch diagram screenshot)
-    - main.py
-    - make_test_results (screenshot of local tests)
+        - transform.py (includes query)
+        - query_log.md (markdown that logs all queries made)
     - Makefile
-    - query_image.png (screenshot of .md log results)
-    - query_log.md (markdown that logs all queries made)
     - README.md
     - requirements.txt
     - test_main.py
@@ -55,6 +47,33 @@
 - python-dotenv == 1.0.1
 - databricks-sql-connector == 3.4.0
 ---
+### What is the Purpose of this Project?
+##### This project demonstrates the functionality of an ETL (Extract, Transform, Load) pipeline using Databricks. The pipeline is designed to automate the extraction of data from a source, apply transformations, and load the data into a sink. The pipeline extracts data from a CSV file located at a publicly accessible GitHub repo. This file contains contains information about remote workers and their mental health status. The ETL pipeline in this project follows the core principles of data engineering:
+
+- Extract: Pull data from a defined data source (A GitHub Repo in this case)
+- Transform: Perform necessary transformations on the extracted data
+- Load: Load the transformed data into a destination for further use or analysis
+
+
+##### First, the data was extracted from was established, and the data was transformed/cleaned and loaded as two tables (remote_health1) into the databricks. 
+
+##### Finally, after the tables are successfully loaded into the database, any type of query can be performed to explore the data. 
+
+___
+### What is the Goal of the Query?
+##### In this project, the query I ran can be seen in the query_log.md file, or in the screenshots below. First, I selected the first 5 rows from the data. Once it was determined that the data was accessible via a query, I selected the total count of employees, grouped the data by industry, and then ordered the data in descending order. Finally, I found the average number of hours worked per week, based on the industry. 
+
+##### Query:
+
+##### Result:
+
+##### Table of Results
+
+
+##### This table displays the results in a more visual way, grouped by industry. We are able to directly compare the number of employees in each industry, and the average hours worked per week.
+
+
+
 
 
 
