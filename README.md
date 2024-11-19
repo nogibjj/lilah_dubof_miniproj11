@@ -26,10 +26,12 @@
             - main.yml
     - data
         - Table 1 csv file
+    - screenshots (contains the readme screenshots)
     - SQL_files
         - extract.py
-        - transform.py (includes query)
         - query_log.md (markdown that logs all queries made)
+        - Transform_load.py (includes query)
+        - Transform.py
     - Makefile
     - README.md
     - requirements.txt
@@ -54,23 +56,39 @@
 - Transform: Perform necessary transformations on the extracted data
 - Load: Load the transformed data into a destination for further use or analysis
 
+---
+### Fivetran API to connect to GitHub
+##### In order to upload files in the correct format to databricks, Fivetran API was used to connect Databricks to GitHub. Then, using Fivetran, a connector to automate the extraction and loading of data from various sources (e.g., databases or APIs) into Databricks was established. Data is typically transferred to a cloud storage service like AWS, which acts as an intermediary. Because of this, the first time the code is run on the cluster, it may take a couple of minutes to verify and run security checks. From there, the data can be uploaded to Databricks FileStore, and the filepath and table name can be saved.
 
-##### First, the data was extracted from was established, and the data was transformed/cleaned and loaded as two tables (remote_health1) into the databricks. 
+#### Connection is Established with Fivetran:
+![alt text](screenshots/filestore.png)
+![alt text](screenshots/table_name.png)
+
 
 ##### Finally, after the tables are successfully loaded into the database, any type of query can be performed to explore the data. 
 
 ___
 ### What is the Goal of the Query?
-##### In this project, the query I ran can be seen in the query_log.md file, or in the screenshots below. First, I selected the first 5 rows from the data. Once it was determined that the data was accessible via a query, I selected the total count of employees, grouped the data by industry, and then ordered the data in descending order. Finally, I found the average number of hours worked per week, based on the industry. 
+##### In this project, the query I ran can be seen in the query_log.md file, or in the screenshots below. I selected the total count of employees, grouped the data by industry, and then ordered the data in descending order. In addition, I found the average number of hours worked per week, based on the industry. 
 
-##### Query:
+#### Count of Employees Based on Industry:
+![alt text](screenshots/count_employees.png)
 
-##### Result:
+#### Average Hours Worked Per Week By Industry:
+![alt text](screenshots/avg_hours.png)
 
-##### Table of Results
+---
+### Weird Issues I Ran Into!
+##### Initially, my scripts were running, but would list the employee counts as being obscenely high. I ran a query to figure out why, and it turned out that there were 13-15 duplicate rows for each Employee ID in the table. At this point, I was interested to see why, and no where in any tables I created were there more than 100 rows. 
 
+##### My first instinct was to check to see if the table was not being overwritten each time, but rather appended to. This was not the case either!
 
-##### This table displays the results in a more visual way, grouped by industry. We are able to directly compare the number of employees in each industry, and the average hours worked per week.
+##### Perhaps I was using the wrong filepath? Maybe the wrong table name was being passed? All no!
+
+##### This is where the magic of setting up the Fivetran connection came in - I had forgotten to do this at the beginning of my project (shooting myself in the foot). Problem fixed, and it was now querying the correct table, with the correct amount of rows!
+
+##### I do not know where the table with 13 duplicates for each Employee is, but if anyone finds it, let me know! :D
+
 
 
 
