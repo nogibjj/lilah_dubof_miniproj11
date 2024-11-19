@@ -1,3 +1,6 @@
+### ETL CI/CD Workflow Success:
+![alt text](screenshots/ETL_workflow.png)
+
 # Mini Project 11: Data Pipeline with Databricks
 #### The purpose of this project is to perform a ETL workflow on a csv file that has been loaded into databricks, and utilize a personal compute to run the pipeline
 
@@ -64,6 +67,8 @@
 ![alt text](screenshots/filestore.png)
 ![alt text](screenshots/table_name.png)
 
+#### ETL Workflow Succeeded:
+
 
 ##### Finally, after the tables are successfully loaded into the database, any type of query can be performed to explore the data. 
 
@@ -88,11 +93,5 @@ ___
 ##### This is where the magic of setting up the Fivetran connection came in - I had forgotten to do this at the beginning of my project (shooting myself in the foot). Problem fixed, and it was now querying the correct table, with the correct amount of rows!
 
 ##### I do not know where the table with 13 duplicates for each Employee is, but if anyone finds it, let me know! :D
-
-
-
-
-
-
 
 
