@@ -1,6 +1,9 @@
+# Databricks notebook source
 import requests
 from pyspark.sql import SparkSession
 import os
+
+# COMMAND ----------
 
 file_path = "/FileStore/tables/table_1_remote_work_mental_health_data.csv"
 # Extracting data from GitHub
