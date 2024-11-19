@@ -7,9 +7,6 @@ format:
 
 lint:
 	ruff check *.py 
-	
-test:
-	python -m pytest -vv test_main.py
 
 check:
 	python main.py
